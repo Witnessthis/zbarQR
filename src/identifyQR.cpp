@@ -1,7 +1,10 @@
 #include "zbar.h"  
- #include "opencv2/imgproc.hpp"
- #include "opencv2/highgui.hpp"
- #include <iostream>  
+#include "opencv2/imgproc.hpp"
+#include "opencv2/highgui.hpp"
+#include <iostream>
+#include <cmath>
+#include <cstdio>
+
  using namespace std;  
  using namespace zbar;  
  using namespace cv;  
@@ -15,7 +18,11 @@
       Mat imgout;  
       cvtColor(img,imgout,CV_GRAY2RGB);  
       int width = img.cols;  
-      int height = img.rows;  
+      int height = img.rows;
+      int32_t topLength;
+     int32_t botLength;
+     int32_t leftLength;
+     int32_t rightLength;
    uchar *raw = (uchar *)img.data;  
    // wrap image data  
    Image image(width, height, "Y800", raw, width * height);  
@@ -35,11 +42,28 @@
            }  
            RotatedRect r = minAreaRect(vp);  
            Point2f pts[4];  
-           r.points(pts);  
+           r.points(pts);
            for(int i=0;i<4;i++){
 
-               cout << "pts[i]: " << pts[i] << endl;
-               cout << "pts[(i+1)%4]: " << pts[(i+1)%4] << endl;
+               if(i == 0){
+                    botLength = sqrt(pow(pts[i].x-pts[(i+1)%4].x, 2) + pow(pts[i].y-pts[(i+1)%4].y, 2));
+                    cout << "botLength: " << botLength << endl;
+               }
+               else if (i == 1){
+                    leftLength = sqrt(pow(pts[i].x-pts[(i+1)%4].x, 2) + pow(pts[i].y-pts[(i+1)%4].y, 2));
+                    cout << "leftLength: " << leftLength << endl;
+               }
+               else if (i == 2){
+                    topLength = sqrt(pow(pts[i].x-pts[(i+1)%4].x, 2) + pow(pts[i].y-pts[(i+1)%4].y, 2));
+                    cout << "topLength: " << topLength << endl;
+               }
+               else if (i == 3){
+                    rightLength = sqrt(pow(pts[i].x-pts[(i+1)%4].x, 2) + pow(pts[i].y-pts[(i+1)%4].y, 2));
+                    cout << "rightLength: " << rightLength << endl;
+               }
+
+//               cout << "pts[i]: " << pts[i] << endl;
+//               cout << "pts[(i+1)%4]: " << pts[(i+1)%4] << endl;
 
                line(imgout,pts[i],pts[(i+1)%4],Scalar(255,0,0),3);
            }  
