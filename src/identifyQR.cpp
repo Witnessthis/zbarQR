@@ -4,13 +4,10 @@
 #include <iostream>
 #include <cmath>
 #include <cstdio>
-
- #include "opencv2/imgproc.hpp"
- #include "opencv2/highgui.hpp"
- #include <iostream>
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
+#include <limits>
 
  using namespace std;
  using namespace zbar;  
@@ -73,6 +70,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     cvtColor(cv_ptr->image,imgout,CV_BGR2GRAY);
     int width = cv_ptr->image.cols;
     int height = cv_ptr->image.rows;
+    cout << width << endl;
+    cout << height << endl;
 
     int32_t topLength;
     int32_t botLength;
@@ -87,9 +86,13 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     int centerx,centery;
     // extract results
     string decodedQr;
+    int qrcodes = 0;
+    vector<int> qrcodecenters;
+
     for(Image::SymbolIterator symbol = qrImage.symbol_begin();
         symbol != qrImage.symbol_end();
         ++symbol) {
+
         vector<Point> vp;
         // do something useful with results
         cout << "decoded " << symbol->get_type_name()
@@ -98,6 +101,9 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
         for(int i=0;i<n;i++){
             vp.push_back(Point(symbol->get_location_x(i),symbol->get_location_y(i)));
         }
+
+        centerx = (vp[0].x + vp[1].x + vp[2].x + vp[3].x)/4;
+        centery = (vp[0].y + vp[1].y + vp[2].y + vp[3].y)/4;
 
         for(int i=0;i<vp.size();i++) {
 
@@ -118,8 +124,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
                 cout << "rightLength: " << rightLength << endl;
             }
 
-            centerx = (vp[0].x + vp[1].x + vp[2].x + vp[3].x)/4;
-            centery = (vp[0].y + vp[1].y + vp[2].y + vp[3].y)/4;
+
 
 
 
@@ -128,9 +133,33 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
         }
 
 
+        qrcodecenters.push_back(centerx);
+
+
         decodedQr = symbol->get_data();
         putText(cv_ptr->image, decodedQr, Point(250, 435), FONT_HERSHEY_PLAIN, 1, Scalar(0, 255, 0), 1, 8);
+        qrcodes++;
     }
+    if(qrcodes > 0){
+        cout << qrcodes << endl;
+        int centerxtemp = numeric_limits<int>::max();
+        int cpos;
+        for (int i=0; i<qrcodecenters.size(); i++){
+            if(qrcodecenters[i] < centerxtemp)
+                centerxtemp = qrcodecenters[i];
+
+
+
+        }
+
+
+
+        cout << "Center position: " <<centerxtemp << endl;
+        cpos = (centerxtemp - width/2) / (width/2);
+
+    }
+
+
     imshow("Image",cv_ptr->image);
     // clean up
     qrImage.set_data(NULL, 0);
