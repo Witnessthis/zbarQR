@@ -84,6 +84,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     Image qrImage(width, height, "Y800", raw, width * height);
     // scan the image for barcodes
     int n = scanner.scan(qrImage);
+    int centerx,centery;
     // extract results
     string decodedQr;
     for(Image::SymbolIterator symbol = qrImage.symbol_begin();
@@ -98,28 +99,36 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
             vp.push_back(Point(symbol->get_location_x(i),symbol->get_location_y(i)));
         }
 
-        for(int i=0;i<vp.size();i++){
+        for(int i=0;i<vp.size();i++) {
 
-            if(i == 0){
-                botLength = sqrt(pow(vp[i].x-vp[(i+1)%4].x, 2) + pow(vp[i].y-vp[(i+1)%4].y, 2));
+            if (i == 0) {
+                botLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
                 cout << "botLength: " << botLength << endl;
             }
-            else if (i == 1){
-                leftLength = sqrt(pow(vp[i].x-vp[(i+1)%4].x, 2) + pow(vp[i].y-vp[(i+1)%4].y, 2));
+            else if (i == 1) {
+                leftLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
                 cout << "leftLength: " << leftLength << endl;
             }
-            else if (i == 2){
-                topLength = sqrt(pow(vp[i].x-vp[(i+1)%4].x, 2) + pow(vp[i].y-vp[(i+1)%4].y, 2));
+            else if (i == 2) {
+                topLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
                 cout << "topLength: " << topLength << endl;
             }
-            else if (i == 3){
-                rightLength = sqrt(pow(vp[i].x-vp[(i+1)%4].x, 2) + pow(vp[i].y-vp[(i+1)%4].y, 2));
+            else if (i == 3) {
+                rightLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
                 cout << "rightLength: " << rightLength << endl;
             }
 
+            centerx = (vp[0].x + vp[1].x + vp[2].x + vp[3].x)/4;
+            centery = (vp[0].y + vp[1].y + vp[2].y + vp[3].y)/4;
+
+
+
+            circle(cv_ptr->image, Point(centerx,centery), 4, Scalar(0,0,255), 2, 8, 0);
+            line(cv_ptr->image,vp[i],vp[(i+1)%4],Scalar(255,0,0),3);
+        }
+
 
         decodedQr = symbol->get_data();
-        cout<<"Angle: "<<r.angle<<endl;
         putText(cv_ptr->image, decodedQr, Point(250, 435), FONT_HERSHEY_PLAIN, 1, Scalar(0, 255, 0), 1, 8);
     }
     imshow("Image",cv_ptr->image);
