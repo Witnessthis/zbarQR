@@ -50,11 +50,10 @@ include_directories(.)
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+ add_message_files(
+   FILES
+   qrAdjust.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -71,10 +70,10 @@ include_directories(.)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   sensor_msgs#   std_msgs
-# )
+ generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -110,6 +109,7 @@ catkin_package(
 #  LIBRARIES zbarQR
 #  CATKIN_DEPENDS ardrone_autonomy cv_bridge image_transport roscpp roscpy sensor_msgs std_msgs
 #  DEPENDS system_lib
+   CATKIN_DEPENDS message_runtime
 )
 
 ###########

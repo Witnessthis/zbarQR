@@ -8,6 +8,7 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include <limits>
+#include <zbarQR/qrAdjust.h>
 
  using namespace std;
  using namespace zbar;  
@@ -15,6 +16,7 @@
 namespace enc = sensor_msgs::image_encodings;
 void imageCallback(const sensor_msgs::ImageConstPtr& msg);
 ImageScanner scanner;
+ros::Publisher QRData;
 
 int main(int argc, char **argv){
      //Init QR scanner
@@ -34,6 +36,7 @@ int main(int argc, char **argv){
     //ros::Subscriber frontImageRaw_sub = nh.subscribe("ardrone/front/image_raw", 10, imageCallback);
     //PC camera
     ros::Subscriber frontImageRaw_sub = nh.subscribe("camera/image_raw", 5, imageCallback);
+    QRData = nh.advertise<zbarQR::qrAdjust>("QRinfo", 1);
 
     /* Toggle to downward camera, show downward.
 	//ros::ServiceClient toggleCam_srv;
@@ -58,6 +61,7 @@ int main(int argc, char **argv){
 void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     cv_bridge::CvImagePtr cv_ptr;
 
+    zbarQR::qrAdjust qrOut;
     cv_ptr = cv_bridge::toCvCopy(msg, enc::BGR8);
 
     // obtain image data
@@ -70,8 +74,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     cvtColor(cv_ptr->image,imgout,CV_BGR2GRAY);
     int width = cv_ptr->image.cols;
     int height = cv_ptr->image.rows;
-    cout << width << endl;
-    cout << height << endl;
 
     int32_t topLength;
     int32_t botLength;
@@ -109,18 +111,22 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 
             if (i == 0) {
                 botLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
+                qrOut.b_length = botLength;
                 cout << "botLength: " << botLength << endl;
             }
             else if (i == 1) {
                 leftLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
+                qrOut.l_height = leftLength;
                 cout << "leftLength: " << leftLength << endl;
             }
             else if (i == 2) {
                 topLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
+                qrOut.t_length = topLength;
                 cout << "topLength: " << topLength << endl;
             }
             else if (i == 3) {
                 rightLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
+                qrOut.r_height = rightLength;
                 cout << "rightLength: " << rightLength << endl;
             }
 
@@ -137,6 +143,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 
 
         decodedQr = symbol->get_data();
+        qrOut.qr_id = decodedQr;
         putText(cv_ptr->image, decodedQr, Point(250, 435), FONT_HERSHEY_PLAIN, 1, Scalar(0, 255, 0), 1, 8);
         qrcodes++;
     }
@@ -147,19 +154,16 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
         for (int i=0; i<qrcodecenters.size(); i++){
             if(qrcodecenters[i] < centerxtemp)
                 centerxtemp = qrcodecenters[i];
-
-
-
         }
 
 
 
         cout << "Center position: " <<centerxtemp << endl;
-        cpos = (centerxtemp - width/2) / (width/2);
+        qrOut.c_pos = (centerxtemp - width/2) / (width/2);
 
     }
 
-
+    QRData.publish(qrOut);
     imshow("Image",cv_ptr->image);
     // clean up
     qrImage.set_data(NULL, 0);
