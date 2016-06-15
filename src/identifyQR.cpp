@@ -1,4 +1,10 @@
 #include "zbar.h"  
+#include "opencv2/imgproc.hpp"
+#include "opencv2/highgui.hpp"
+#include <iostream>
+#include <cmath>
+#include <cstdio>
+
  #include "opencv2/imgproc.hpp"
  #include "opencv2/highgui.hpp"
  #include <iostream>
@@ -6,7 +12,7 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 
- using namespace std;  
+ using namespace std;
  using namespace zbar;  
  using namespace cv;
 namespace enc = sensor_msgs::image_encodings;
@@ -67,6 +73,12 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     cvtColor(cv_ptr->image,imgout,CV_BGR2GRAY);
     int width = cv_ptr->image.cols;
     int height = cv_ptr->image.rows;
+
+    int32_t topLength;
+    int32_t botLength;
+    int32_t leftLength;
+    int32_t rightLength;
+
     uchar *raw = (uchar *)imgout.data;
     // wrap image data
     Image qrImage(width, height, "Y800", raw, width * height);
@@ -85,17 +97,26 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
         for(int i=0;i<n;i++){
             vp.push_back(Point(symbol->get_location_x(i),symbol->get_location_y(i)));
         }
-        RotatedRect r = minAreaRect(vp);
-        Point2f pts[4];
-        r.points(pts);
-        for(int i=0;i<4;i++){
 
-            cout << "pts[i]: " << pts[i] << endl;
-            cout << "pts[(i+1)%4]: " << pts[(i+1)%4] << endl;
+        for(int i=0;i<vp.size();i++){
 
-            line(cv_ptr->image,pts[i],pts[(i+1)%4],Scalar(255,0,0),3);
+            if(i == 0){
+                botLength = sqrt(pow(vp[i].x-vp[(i+1)%4].x, 2) + pow(vp[i].y-vp[(i+1)%4].y, 2));
+                cout << "botLength: " << botLength << endl;
+            }
+            else if (i == 1){
+                leftLength = sqrt(pow(vp[i].x-vp[(i+1)%4].x, 2) + pow(vp[i].y-vp[(i+1)%4].y, 2));
+                cout << "leftLength: " << leftLength << endl;
+            }
+            else if (i == 2){
+                topLength = sqrt(pow(vp[i].x-vp[(i+1)%4].x, 2) + pow(vp[i].y-vp[(i+1)%4].y, 2));
+                cout << "topLength: " << topLength << endl;
+            }
+            else if (i == 3){
+                rightLength = sqrt(pow(vp[i].x-vp[(i+1)%4].x, 2) + pow(vp[i].y-vp[(i+1)%4].y, 2));
+                cout << "rightLength: " << rightLength << endl;
+            }
 
-        }
 
         decodedQr = symbol->get_data();
         cout<<"Angle: "<<r.angle<<endl;
