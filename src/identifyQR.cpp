@@ -157,8 +157,11 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
                 centerxtemp = qrcodecenters[i];
         }
 
+
+
         cout << "Center position: " <<centerxtemp << endl;
         qrOut.c_pos = (centerxtemp - width/2) / (width/2);
+
     }
 
     if(!(decodedQr == "")){
