@@ -9,6 +9,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <limits>
 #include <zbarQR/qrAdjust.h>
+#include <string>
 
  using namespace std;
  using namespace zbar;  
@@ -111,22 +112,38 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 
             if (i == 0) {
                 botLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
-                qrOut.b_length = botLength;
+                if(botLength > 0)
+                    qrOut.b_length = std::to_string(botLength);
+                else
+                    qrOut.r_height = "unknown";
+
                 cout << "botLength: " << botLength << endl;
             }
             else if (i == 1) {
                 leftLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
-                qrOut.l_height = leftLength;
+                if(leftLength > 0)
+                    qrOut.l_height = std::to_string(leftLength);
+                else
+                    qrOut.r_height = "unknown";
+
                 cout << "leftLength: " << leftLength << endl;
             }
             else if (i == 2) {
                 topLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
-                qrOut.t_length = topLength;
+                if(topLength > 0)
+                    qrOut.t_length = std::to_string(topLength);
+                else
+                    qrOut.r_height = "unknown";
+
                 cout << "topLength: " << topLength << endl;
             }
             else if (i == 3) {
                 rightLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
-                qrOut.r_height = rightLength;
+                if(rightLength > 0)
+                    qrOut.r_height = std::to_string(rightLength);
+                else
+                    qrOut.r_height = "unknown";
+
                 cout << "rightLength: " << rightLength << endl;
             }
 
@@ -150,7 +167,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     if(qrcodes > 0){
         cout << qrcodes << endl;
         int centerxtemp = numeric_limits<int>::max();
-        int cpos;
         for (int i=0; i<qrcodecenters.size(); i++){
             if(qrcodecenters[i] < centerxtemp)
                 centerxtemp = qrcodecenters[i];
