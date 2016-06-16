@@ -155,6 +155,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     if(qrcodes > 0){
         cout << qrcodes << endl;
         int centerxtemp = numeric_limits<int>::max();
+        float c_pos;
         for (int i=0; i<qrcodecenters.size(); i++){
             if(qrcodecenters[i] < centerxtemp)
                 centerxtemp = qrcodecenters[i];
@@ -162,8 +163,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 
 
 
-        cout << "Center position: " <<centerxtemp << endl;
-        qrOut.c_pos = (centerxtemp - width/2) / (width/2);
+        c_pos = (float)(centerxtemp - (width/2)) / (width/2);
+        qrOut.c_pos = c_pos;
 
     }
 
