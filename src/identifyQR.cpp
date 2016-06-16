@@ -112,37 +112,25 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 
             if (i == 0) {
                 botLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
-                if(botLength > 0)
-                    qrOut.b_length = std::to_string(botLength);
-                else
-                    qrOut.r_height = "unknown";
+                    qrOut.b_length = botLength;
 
                 cout << "botLength: " << botLength << endl;
             }
             else if (i == 1) {
                 leftLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
-                if(leftLength > 0)
-                    qrOut.l_height = std::to_string(leftLength);
-                else
-                    qrOut.r_height = "unknown";
+                    qrOut.l_height = leftLength;
 
                 cout << "leftLength: " << leftLength << endl;
             }
             else if (i == 2) {
                 topLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
-                if(topLength > 0)
-                    qrOut.t_length = std::to_string(topLength);
-                else
-                    qrOut.r_height = "unknown";
+                    qrOut.t_length = topLength;
 
                 cout << "topLength: " << topLength << endl;
             }
             else if (i == 3) {
                 rightLength = sqrt(pow(vp[i].x - vp[(i + 1) % 4].x, 2) + pow(vp[i].y - vp[(i + 1) % 4].y, 2));
-                if(rightLength > 0)
-                    qrOut.r_height = std::to_string(rightLength);
-                else
-                    qrOut.r_height = "unknown";
+                    qrOut.r_height = rightLength;
 
                 cout << "rightLength: " << rightLength << endl;
             }
